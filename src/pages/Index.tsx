@@ -180,27 +180,6 @@ const Index = () => {
             <span className="text-gold/60 group-hover:text-gold transition-colors">›</span>
           </button>
 
-          <button
-            onClick={() => {
-              setStaffSession(
-                {
-                  name: 'Free Login',
-                  employeeId: 'free-login',
-                  isAdmin: true,
-                  permissions: ['admin'],
-                },
-                false,
-              );
-              localStorage.setItem('emp_id', 'free-login');
-              localStorage.setItem('emp_name', 'Free Login');
-              toast.success('Free Login (temporary)');
-              navigate('/admin');
-            }}
-            className="mt-1 flex items-center justify-center gap-2 font-body text-[11px] tracking-[0.25em] uppercase py-2.5 text-amber-400/80 hover:text-amber-300 border border-dashed border-amber-500/30 rounded-xl transition-colors"
-          >
-            ⚡ Free Login · Temporary
-          </button>
-
           <p className="font-body text-[10px] tracking-[0.35em] uppercase text-gold/70 text-center mt-6">
             {profile?.resort_name ? `${profile.resort_name.split(' ')[0]} · Where Nature Welcomes You Home` : 'Where Nature Welcomes You Home'}
           </p>

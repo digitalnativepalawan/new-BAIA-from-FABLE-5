@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-internal-secret, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 function getSupabaseAdmin() {
@@ -16,6 +16,17 @@ function getSupabaseAdmin() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Fail-closed authorization: this endpoint runs with the service-role key and
+  // returns sensitive financial/operational data, so it must never be publicly
+  // callable. Callers (cron jobs, dashboards) must present the shared secret.
+  const secret = Deno.env.get("INTERNAL_FN_SECRET");
+  if (!secret || req.headers.get("x-internal-secret") !== secret) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {

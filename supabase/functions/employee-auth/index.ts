@@ -34,6 +34,40 @@ async function hashPin(pin: string): Promise<string> {
   return btoa(String.fromCharCode(...combined));
 }
 
+/**
+ * Verify that the supplied name + PIN belong to an active employee who holds
+ * the 'admin' permission. Used to authorize privileged actions (e.g. resetting
+ * another employee's PIN). These functions run with the service-role key and
+ * cannot otherwise trust the caller, so the caller must re-prove admin identity.
+ */
+async function verifyAdminCredentials(
+  supabase: any,
+  name: string,
+  pin: string,
+): Promise<{ ok: true; employee: any } | { ok: false; message: string; status: number }> {
+  const nameLower = (name ?? '').trim().toLowerCase();
+  const { data: allActive } = await supabase.from('employees').select('*').eq('active', true);
+  const emp = (allActive || []).find((e: any) =>
+    e.name?.toLowerCase() === nameLower || e.display_name?.toLowerCase() === nameLower,
+  );
+  if (!emp || !emp.password_hash) {
+    return { ok: false, message: 'Invalid admin credentials', status: 403 };
+  }
+  const valid = await verifyPin(pin, emp.password_hash);
+  if (!valid) {
+    return { ok: false, message: 'Invalid admin credentials', status: 403 };
+  }
+  const { data: perms } = await supabase
+    .from('employee_permissions')
+    .select('permission')
+    .eq('employee_id', emp.id)
+    .eq('permission', 'admin');
+  if (!perms || perms.length === 0) {
+    return { ok: false, message: 'Admin permission required', status: 403 };
+  }
+  return { ok: true, employee: emp };
+}
+
 async function verifyPin(pin: string, stored: string): Promise<boolean> {
   const encoder = new TextEncoder();
   const combined = Uint8Array.from(atob(stored), (c) => c.charCodeAt(0));
@@ -67,11 +101,42 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { action, employee_id, name, pin, old_pin, new_pin } = body;
+    const { action, employee_id, name, pin, old_pin, new_pin, admin_name, admin_pin } = body;
 
     if (action === 'set-password') {
       if (!employee_id || !pin) {
         return businessError('employee_id and pin required', 400);
+      }
+      if (String(pin).length < 4) {
+        return businessError('PIN must be at least 4 digits', 400);
+      }
+
+      // Bootstrap exception: if no admin has a PIN yet, allow the first PIN to be
+      // set without prior admin auth (initial provisioning). Once any admin holds
+      // a PIN, every further PIN reset requires admin re-authentication so that a
+      // publicly reachable endpoint can no longer take over arbitrary accounts.
+      const { data: adminRows } = await supabase
+        .from('employee_permissions')
+        .select('employee_id')
+        .eq('permission', 'admin');
+      const adminIds = (adminRows || []).map((r: any) => r.employee_id);
+      let adminHasPin = false;
+      if (adminIds.length > 0) {
+        const { data: adminEmps } = await supabase
+          .from('employees')
+          .select('id, password_hash')
+          .in('id', adminIds);
+        adminHasPin = (adminEmps || []).some((e: any) => !!e.password_hash);
+      }
+
+      if (adminHasPin) {
+        if (!admin_name || !admin_pin) {
+          return businessError('Admin authentication required to set a PIN');
+        }
+        const adminAuth = await verifyAdminCredentials(supabase, admin_name, admin_pin);
+        if (!adminAuth.ok) {
+          return businessError(adminAuth.message);
+        }
       }
 
       const hash = await hashPin(pin);

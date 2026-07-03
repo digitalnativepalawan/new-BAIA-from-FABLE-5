@@ -14,6 +14,7 @@ import StaffAccessManager from '@/components/admin/StaffAccessManager';
 import { buildTeamWhatsAppMessage, openWhatsApp } from '@/lib/messenger';
 import ITNotesSection from '@/components/admin/ITNotesSection';
 import { useResortProfile } from '@/hooks/useResortProfile';
+import { getStaffSession } from '@/lib/session';
 
 type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 type SubView = 'employees' | 'shifts' | 'summary' | 'payments' | 'tasks' | 'settings' | 'it';
@@ -60,6 +61,7 @@ const PayrollDashboard = ({ readOnly = false }: { readOnly?: boolean }) => {
   // Contact & PIN state
   const [pinEmployeeId, setPinEmployeeId] = useState<string | null>(null);
   const [pinValue, setPinValue] = useState('');
+  const [adminPinValue, setAdminPinValue] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editMessenger, setEditMessenger] = useState('');
   const [contactEditId, setContactEditId] = useState<string | null>(null);
@@ -761,19 +763,28 @@ const PayrollDashboard = ({ readOnly = false }: { readOnly?: boolean }) => {
               {pinEmployeeId === emp.id && !editingId && (
                 <div className="space-y-2 border-t border-border pt-2">
                   <Input type="password" value={pinValue} onChange={e => setPinValue(e.target.value)}
-                    placeholder="New PIN" className="bg-secondary border-border text-foreground font-body text-sm h-8 w-full" />
+                    placeholder="New PIN (min 4 digits)" className="bg-secondary border-border text-foreground font-body text-sm h-8 w-full" />
+                  <Input type="password" value={adminPinValue} onChange={e => setAdminPinValue(e.target.value)}
+                    placeholder="Your admin PIN (to authorize)" className="bg-secondary border-border text-foreground font-body text-sm h-8 w-full" />
                   <div className="flex gap-2">
-                    <Button size="sm" className="font-display text-xs tracking-wider h-8 flex-1" disabled={!pinValue}
+                    <Button size="sm" className="font-display text-xs tracking-wider h-8 flex-1" disabled={pinValue.length < 4 || !adminPinValue}
                       onClick={async () => {
-                        const { error } = await supabase.functions.invoke('employee-auth', {
-                          body: { action: 'set-password', employee_id: emp.id, pin: pinValue },
+                        const admin = getStaffSession();
+                        const { data, error } = await supabase.functions.invoke('employee-auth', {
+                          body: {
+                            action: 'set-password',
+                            employee_id: emp.id,
+                            pin: pinValue,
+                            admin_name: admin?.name,
+                            admin_pin: adminPinValue,
+                          },
                         });
-                        if (error) { toast.error('Failed to set PIN'); return; }
-                        setPinEmployeeId(null); setPinValue('');
+                        if (error || data?.error) { toast.error(data?.error || 'Failed to set PIN'); return; }
+                        setPinEmployeeId(null); setPinValue(''); setAdminPinValue('');
                         qc.invalidateQueries({ queryKey: ['employees-all'] });
                         toast.success(`PIN set for ${emp.name}`);
                       }}>Set PIN</Button>
-                    <Button size="sm" variant="outline" className="h-8" onClick={() => setPinEmployeeId(null)}><X className="w-3.5 h-3.5" /></Button>
+                    <Button size="sm" variant="outline" className="h-8" onClick={() => { setPinEmployeeId(null); setAdminPinValue(''); }}><X className="w-3.5 h-3.5" /></Button>
                   </div>
                 </div>
               )}
