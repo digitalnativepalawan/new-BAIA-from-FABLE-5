@@ -54,6 +54,7 @@ const Index = () => {
           employeeId: data.employee.id,
           isAdmin: data.isAdmin || false,
           permissions: data.permissions || [],
+          token: data.token || undefined,
         },
         remember,
       );

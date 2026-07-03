@@ -18,6 +18,55 @@ const respond = (payload: Record<string, unknown>, status = 200) =>
 const businessError = (message: string, status = 200) =>
   respond({ error: message }, status);
 
+// ── Staff JWT minting ─────────────────────────────────────────────────────────
+// Mints a Supabase-compatible HS256 JWT so that authenticated staff requests
+// carry a verifiable identity + permission claims that RLS policies can enforce.
+// INERT unless STAFF_JWT_SECRET is configured — when it is absent the functions
+// behave exactly as before (no token issued), so this is safe to deploy ahead of
+// the RLS cutover. STAFF_JWT_SECRET MUST equal the project's JWT secret
+// (Settings → API → JWT Settings) so PostgREST accepts the signature.
+
+const STAFF_JWT_TTL_SECONDS = 8 * 60 * 60; // 8 hours, matches the client session
+
+function base64url(bytes: Uint8Array): string {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function signStaffJwt(payload: Record<string, unknown>, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const segments = [
+    base64url(enc.encode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))),
+    base64url(enc.encode(JSON.stringify(payload))),
+  ];
+  const signingInput = segments.join('.');
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+  );
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(signingInput)));
+  return `${signingInput}.${base64url(sig)}`;
+}
+
+/** Returns a signed staff JWT, or null when STAFF_JWT_SECRET is not configured. */
+async function mintStaffToken(emp: any, permissions: string[], isAdmin: boolean): Promise<string | null> {
+  const secret = Deno.env.get('STAFF_JWT_SECRET');
+  if (!secret) return null;
+  const now = Math.floor(Date.now() / 1000);
+  return await signStaffJwt({
+    iss: 'baia-staff-auth',
+    sub: emp.id,
+    aud: 'authenticated',
+    role: 'authenticated',
+    employee_id: emp.id,
+    name: emp.name ?? emp.display_name ?? '',
+    permissions,
+    is_admin: isAdmin,
+    iat: now,
+    exp: now + STAFF_JWT_TTL_SECONDS,
+  }, secret);
+}
+
 async function hashPin(pin: string): Promise<string> {
   const encoder = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -172,7 +221,8 @@ Deno.serve(async (req) => {
       const permList = (perms || []).map((p: any) => p.permission);
       const isAdmin = permList.includes('admin');
       const { password_hash, ...safeEmp } = emp;
-      return respond({ employee: safeEmp, isAdmin, permissions: permList });
+      const token = await mintStaffToken(emp, permList, isAdmin);
+      return respond({ employee: safeEmp, isAdmin, permissions: permList, token });
     }
 
     if (action === 'admin-verify') {
@@ -198,13 +248,16 @@ Deno.serve(async (req) => {
         return businessError('Invalid PIN');
       }
 
-      const { data: perms } = await supabase.from('employee_permissions').select('permission').eq('employee_id', emp.id).eq('permission', 'admin');
-      if (!perms || perms.length === 0) {
+      const { data: adminPerm } = await supabase.from('employee_permissions').select('permission').eq('employee_id', emp.id).eq('permission', 'admin');
+      if (!adminPerm || adminPerm.length === 0) {
         return businessError('Access denied. Admin permission required.', 403);
       }
 
+      const { data: allPerms } = await supabase.from('employee_permissions').select('permission').eq('employee_id', emp.id);
+      const permList = (allPerms || []).map((p: any) => p.permission);
       const { password_hash, ...safeEmp } = emp;
-      return respond({ employee: safeEmp, isAdmin: true });
+      const token = await mintStaffToken(emp, permList, true);
+      return respond({ employee: safeEmp, isAdmin: true, permissions: permList, token });
     }
 
     if (action === 'change-pin') {
