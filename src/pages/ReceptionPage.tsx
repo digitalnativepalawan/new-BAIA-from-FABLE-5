@@ -1014,13 +1014,13 @@ const ReceptionPage = ({ embedded = false }: { embedded?: boolean }) => {
         <header className="flex items-start justify-between gap-4 mb-6">
           <div className="min-w-0">
             <p className="font-body text-[10px] tracking-[0.3em] uppercase text-gold/80 mb-1.5">
-              Reception · BAIA
+              Reception · KAPWA OS
             </p>
             <h1 className="font-serif-display text-3xl sm:text-4xl text-foreground leading-tight">
               Good {timeOfDay}, {staffName} <span className="inline-block">👋</span>
             </h1>
             <p className="font-body text-sm text-muted-foreground mt-1.5">
-              Here's what's happening at BAIA · <span className="text-foreground/70">{manilaTime}</span>
+              Here's what's happening at KAPWA OS · <span className="text-foreground/70">{manilaTime}</span>
             </p>
           </div>
           <div className="shrink-0 luxury-glass rounded-2xl px-3 py-2 flex items-center gap-2.5">

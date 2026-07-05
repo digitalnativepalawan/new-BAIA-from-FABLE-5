@@ -271,7 +271,7 @@ const BillingConfigForm = () => {
 
         <div>
           <label className="font-body text-xs text-cream-dim">Receipt Header Text</label>
-          <Input value={form.receipt_header} onChange={e => set('receipt_header', e.target.value)} className="bg-secondary border-border text-foreground font-body mt-1" placeholder="e.g. BAIA BOUTIQUE - San Vicente" />
+          <Input value={form.receipt_header} onChange={e => set('receipt_header', e.target.value)} className="bg-secondary border-border text-foreground font-body mt-1" placeholder="e.g. KAPWA RESORT - San Vicente" />
         </div>
         <div>
           <label className="font-body text-xs text-cream-dim">Receipt Footer Text</label>

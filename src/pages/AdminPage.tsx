@@ -220,7 +220,7 @@ const AdminPage = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-internal-secret': 'baia-ai-2026',
+            'x-internal-secret': 'kapwa-os-ai-2026',
           },
           body: JSON.stringify({ type: 'morning' }),
         }

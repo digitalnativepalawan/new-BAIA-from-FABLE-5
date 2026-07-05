@@ -1,6 +1,6 @@
 # Claim-based auth + RLS migration
 
-This is the rollout guide for moving BAIA from **client-trusted permissions** (a
+This is the rollout guide for moving KAPWA OS from **client-trusted permissions** (a
 forgeable `localStorage` blob, plus a database that is world-readable/writable
 through the public anon key) to **claim-based auth** enforced by Postgres RLS.
 

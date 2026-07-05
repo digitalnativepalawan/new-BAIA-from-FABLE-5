@@ -54,7 +54,7 @@ async function mintStaffToken(emp: any, permissions: string[], isAdmin: boolean)
   if (!secret) return null;
   const now = Math.floor(Date.now() / 1000);
   return await signStaffJwt({
-    iss: 'baia-staff-auth',
+    iss: 'kapwa-staff-auth',
     sub: emp.id,
     aud: 'authenticated',
     role: 'authenticated',

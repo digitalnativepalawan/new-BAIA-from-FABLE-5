@@ -260,7 +260,7 @@ async function detectIssues(supabase: any): Promise<Issue[]> {
 async function generateSummary(issues: Issue[]): Promise<string> {
   if (issues.length === 0) return "✅ Reservations healthy. No issues detected.";
 
-  return await callClaude(`You are the reservations coordinator for Baia Resort.
+  return await callClaude(`You are the reservations coordinator for KAPWA Hospitality OS.
 
 Summarize these booking issues for the resort owner. Plain text only. No markdown.
 Bullets use "•". Be direct. Maximum 200 words. Group by severity.

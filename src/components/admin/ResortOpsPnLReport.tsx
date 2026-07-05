@@ -202,7 +202,7 @@ const ResortOpsPnLReport = ({ monthBookings, orders, monthExpenses, menuItems }:
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>BAIA P&amp;L Report &mdash; ${monthYearLabel}</title>
+  <title>KAPWA Hospitality OS P&amp;L Report — ${monthYearLabel}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a2e; background: #fff; }
@@ -237,7 +237,7 @@ const ResortOpsPnLReport = ({ monthBookings, orders, monthExpenses, menuItems }:
 </head>
 <body>
   <div class="header">
-    <h1>BAIA Boutique Resort</h1>
+    <h1>KAPWA Hospitality OS</h1>
     <div class="subtitle">San Vicente, Palawan</div>
     <div class="report-title">Monthly P&amp;L Report &mdash; ${monthYearLabel}</div>
   </div>
@@ -298,7 +298,7 @@ const ResortOpsPnLReport = ({ monthBookings, orders, monthExpenses, menuItems }:
 
     <div class="footer">
       <span>Generated: ${generatedDate}</span>
-      <span>Powered by BAIA ROS</span>
+      <span>Powered by KAPWA Hospitality OS</span>
     </div>
   </div>
   <script>window.onload = function(){ window.print(); };<\/script>

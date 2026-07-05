@@ -1,12 +1,14 @@
-# Reception Luxury Dashboard Refactor (presentation only)
+# KAPWA Hospitality OS — workspace plan
 
-Restyle `src/pages/ReceptionPage.tsx` so its header, stat strip, and overview blocks visually match the uploaded BAIA reference. **No data, no routes, no hooks, no business logic touched.** Mobile-first stacked layout, desktop two-column where the reference shows side-by-side blocks.
+## Reception luxury dashboard refactor
+
+Restyle `src/pages/ReceptionPage.tsx` so its header, stat strip, and overview blocks visually match the uploaded KAPWA Hospitality OS reference. **No data, no routes, no hooks, no business logic touched.** Mobile-first stacked layout; desktop uses two-column where the reference shows side-by-side blocks.
 
 ## What changes
 
 ### 1. Header strip (top of page)
 - Replace current `LuxuryHeader` with a two-column header:
-  - **Left:** Eyebrow "Reception · BAIA" in gold tracking, big serif `Good {timeOfDay}, {staffName} 👋`, sub "Here's what's happening at BAIA."
+  - **Left:** Eyebrow "Reception · KAPWA OS" in gold tracking, big serif `Good {timeOfDay}, {staffName} 👋`, sub "Here's what's happening at KAPWA OS."
   - **Right:** Glass pill containing weather placeholder (`Cloud` icon, `28°C`, `San Vicente, Palawan`) — static labels only, no new fetches.
 
 ### 2. Hero stat row — 4 glowing cards

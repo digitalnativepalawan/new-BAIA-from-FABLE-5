@@ -1,22 +1,16 @@
-# Welcome to your Lovable project
+# Welcome to KAPWA Hospitality OS
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**URL**: https://github.com/digitalnativepalawan/new-KAPWA OS-from-FABLE-5
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in upstream tooling.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -39,7 +33,7 @@ npm run dev
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Click on the "Edit" button (pencil icon) at the top right of the file view.
 - Make your changes and commit the changes.
 
 **Use GitHub Codespaces**
@@ -62,12 +56,13 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Open the project in your deployment environment and publish via its deployment workflow.
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain to my project?
 
 Yes, you can!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+To connect a domain, follow your deployment provider's custom-domain setup flow.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Read more here: https://docs.lovable.dev/features/custom-domain#custom-domain
+

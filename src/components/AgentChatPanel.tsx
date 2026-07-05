@@ -91,7 +91,7 @@ export default function AgentChatPanel() {
         <DialogContent className="sm:max-w-md h-[600px] flex flex-col p-0 gap-0 bg-card border-border">
           <DialogHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between">
             <DialogTitle className="font-display text-sm tracking-wider text-foreground">
-              BAIA Assistant
+              KAPWA OS Assistant
             </DialogTitle>
             <Button
               variant="ghost"

@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico"],
       manifest: {
-        name: "TALA — BAIA Resort Concierge",
+        name: "TALA — KAPWA OS Resort Concierge",
         short_name: "TALA",
-        description: "Voice concierge for BAIA Boutique Resort, San Vicente, Palawan",
+        description: "Voice concierge for KAPWA OS Boutique Resort, San Vicente, Palawan",
         theme_color: "#1C3A4A",
         background_color: "#E9E2D7",
         display: "standalone",

@@ -204,7 +204,7 @@ const GuestPortal = () => {
                     Hello, {session.guest_name.split(' ')[0]}! <span>👋</span>
                   </h1>
                   <p className="font-body text-xs text-muted-foreground mt-0.5">
-                    Welcome to <span className="text-gold">{profile?.resort_name || 'BAIA Boutique'}</span>
+                    Welcome to <span className="text-gold">{profile?.resort_name || 'KAPWA OS Boutique'}</span>
                   </p>
                   <p className="font-body text-[11px] text-muted-foreground">
                     We're here to make your stay exceptional.
@@ -442,7 +442,7 @@ const HotelInfoView = ({ profile }: { profile: any }) => (
     <div className="luxury-glass rounded-2xl p-5 space-y-4">
       <div>
         <p className="font-body text-[10px] tracking-[0.28em] uppercase text-gold/80 mb-1">Resort</p>
-        <p className="font-serif-display text-xl text-foreground">{profile?.resort_name || 'BAIA Boutique'}</p>
+        <p className="font-serif-display text-xl text-foreground">{profile?.resort_name || 'KAPWA OS Boutique'}</p>
         {profile?.tagline && <p className="font-body text-sm text-muted-foreground mt-1">{profile.tagline}</p>}
       </div>
       {profile?.address && (

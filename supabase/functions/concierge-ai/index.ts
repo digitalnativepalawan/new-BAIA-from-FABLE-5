@@ -84,7 +84,7 @@ function routeRequest(requestType: string, details: string): { group: string; la
 // ── Claude draft for complex requests ────────────────────────────────────────
 
 async function draftResponse(request: any): Promise<string> {
-  const prompt = `You are the guest concierge AI at Baia Resort in San Vicente, Palawan.
+  const prompt = `You are the guest concierge AI at KAPWA Hospitality OS in San Vicente, Palawan.
 
 Draft a brief staff action note (not a guest-facing message) for handling this guest request.
 Plain text. Maximum 60 words. Start with the action verb. Be specific.
@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
     const totalOpen = requests.length;
     const hadActivity = routed.length > 0 || escalated.length > 0 || complaints.length > 0;
     if (totalOpen > 0 && hadActivity) {
-      const summary = await callClaude(`You are the guest concierge coordinator for Baia Resort.
+      const summary = await callClaude(`You are the guest concierge coordinator for KAPWA Hospitality OS.
 
 Summarize the current guest request status for the manager. Plain text only. No markdown. Bullets use "•".
 Start with "🛎️ CONCIERGE STATUS" on line 1. Maximum 150 words.

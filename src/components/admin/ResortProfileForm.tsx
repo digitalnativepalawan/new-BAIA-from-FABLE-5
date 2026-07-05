@@ -149,7 +149,7 @@ const ResortProfileForm = () => {
       {/* Name & tagline */}
       <div>
         <label className="font-body text-xs text-cream-dim">Resort Name</label>
-        <Input value={form.resort_name} onChange={set('resort_name')} placeholder="e.g. Baia Palawan" className={inputClass} />
+        <Input value={form.resort_name} onChange={set('resort_name')} placeholder="e.g. KAPWA San Vicente" className={inputClass} />
       </div>
       <div>
         <label className="font-body text-xs text-cream-dim">Tagline</label>

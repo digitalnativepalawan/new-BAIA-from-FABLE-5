@@ -36,7 +36,7 @@ export function formatWhatsAppMessage(order: OrderInfo, items: CartItem[], total
         `*Type:* ${typeLabels[order.orderType] || order.orderType}`,
       ]
     : [
-        '🌴 *NEW ORDER – BAIA PALAWAN*',
+        '🌴 *NEW ORDER – KAPWA OS PALAWAN*',
         '',
         `*Type:* ${typeLabels[order.orderType] || order.orderType}`,
         `*Location:* ${order.locationDetail}`,

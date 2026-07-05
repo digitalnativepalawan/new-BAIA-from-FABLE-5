@@ -284,7 +284,7 @@ function buildPrompt(data: Record<string, any>): string {
     daily:   `Focus on: revenue totals (F&B + unpaid balance overview), occupancy achieved, tasks completed vs open, expenses recorded, open items carried to tomorrow.`,
   };
 
-  return `Generate a ${labels[data.brief_type]} for Baia Resort on ${data.date}.
+  return `Generate a ${labels[data.brief_type]} for KAPWA Hospitality OS on ${data.date}.
 
 Operational data:
 ${JSON.stringify(data, null, 2)}

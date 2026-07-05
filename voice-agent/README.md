@@ -1,17 +1,17 @@
-# TALA — Guest Voice Agent (BAIA Boutique Resort)
+# TALA — Guest Voice Agent (KAPWA OS Boutique Resort)
 
 Self-hosted voice concierge: LiveKit (room transport) + Ollama/Qwen3 8B (LLM)
-+ whisper.cpp (STT) + Kokoro (TTS) + Supabase (BAIA's live ops database).
++ whisper.cpp (STT) + Kokoro (TTS) + Supabase (KAPWA OS's live ops database).
 Zero per-minute/per-token cost — everything runs on your own hardware.
 
-Lives at `voice-agent/` inside `baia-backoffice`, separate from the existing
+Lives at `voice-agent/` inside `kapwa-backoffice`, separate from the existing
 `concierge-ai` Supabase function (that one is OpenRouter/Claude-based staff
 triage — unrelated, don't touch it).
 
 ## What's real vs. what's left to wire up
 
 **Built and verified in this pass:**
-- All 12 tools (`agent/tools/*`) — real Supabase queries against BAIA's
+- All 12 tools (`agent/tools/*`) — real Supabase queries against KAPWA OS's
   actual tables (`resort_ops_bookings`, `resort_ops_units`, `guest_requests`,
   `housekeeping_orders`, `resort_ops_tasks`, `tour_bookings`, `tours_config`,
   `assets`). Verified by inspecting the real `types.ts` from your repo, not
@@ -117,7 +117,7 @@ Guest mic (React PWA)
   -> LiveKit room (self-hosted)
     -> whisper.cpp (STT, OpenAI-compatible)
       -> AgentSession (livekit-agents) + Ollama/Qwen3 8B (OpenAI-compatible LLM endpoint)
-        -> TalaAgent.@function_tool methods -> agent/tools/* -> Supabase (BAIA live data)
+        -> TalaAgent.@function_tool methods -> agent/tools/* -> Supabase (KAPWA OS live data)
       -> Kokoro (TTS, OpenAI-compatible)
     -> back into LiveKit room
   -> Guest hears TALA's reply

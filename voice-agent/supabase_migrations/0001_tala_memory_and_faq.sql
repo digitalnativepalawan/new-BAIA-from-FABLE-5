@@ -1,6 +1,6 @@
 -- TALA Voice Agent: guest memory + FAQ tables
 -- Run with: supabase db push  (or paste into Supabase SQL editor)
--- Project: paghxagqnaisxesmhnwj (BAIA)
+-- Project: paghxagqnaisxesmhnwj (KAPWA OS)
 
 -- ── Guest memory ──────────────────────────────────────────────────────────
 -- One row per guest, keyed to resort_ops_guests.id.

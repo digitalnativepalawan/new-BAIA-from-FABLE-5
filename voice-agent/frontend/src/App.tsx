@@ -20,7 +20,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-6 bg-limestone">
       <div className="text-center">
         <h1 className="font-serif text-4xl text-ocean">TALA</h1>
-        <p className="text-bronze mt-1">BAIA Boutique Resort · San Vicente, Palawan</p>
+        <p className="text-bronze mt-1">KAPWA OS Boutique Resort · San Vicente, Palawan</p>
       </div>
 
       <MicButton
