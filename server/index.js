@@ -1,12 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const execAsync = promisify(exec);
 const app = express();
 
 app.use(cors());
@@ -82,9 +80,39 @@ app.post('/api/hermes/chat', async (req, res) => {
       prompt = `[${context}] ${message}`;
     }
 
-    const { stdout } = await execAsync(`hermes chat -q ${JSON.stringify(prompt)}`, {
+    const child = spawn('hermes', ['chat', '-q', '-', '--quiet'], {
+      shell: true,
       timeout: 180000,
-      maxBuffer: 2 * 1024 * 1024,
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', (error) => {
+      console.error('Hermes spawn error:', error);
+    });
+
+    child.stdin.write(prompt);
+    child.stdin.end();
+
+    await new Promise((resolve, reject) => {
+      child.on('close', (code) => {
+        if (code === 0 || stdout.trim()) {
+          resolve();
+        } else {
+          reject(new Error(stderr.trim() || `hermes exited with code ${code}`));
+        }
+      });
+
+      child.on('error', reject);
     });
 
     const reply = extractReply(stdout || '');
