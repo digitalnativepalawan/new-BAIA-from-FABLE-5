@@ -43,30 +43,25 @@ export default function AgentChatPanel() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add resort profile header if your backend uses it
-          // 'X-Resort-Profile': 'your-resort-id',
-          // Add auth header if needed
-          // 'Authorization': `Bearer ${yourToken}`,
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: userMessage,
-          // Optional: include current tab context
-          context: 'admin-panel'
+          context: 'guest-concierge',
         }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setMessages(m => [...m, { 
-        role: 'assistant', 
-        content: data.reply || 'No response from agent.', 
-        timestamp: new Date() 
+      setMessages(m => [...m, {
+        role: 'assistant',
+        content: data.reply || 'No response from agent.',
+        timestamp: new Date()
       }]);
     } catch (err: any) {
-      setMessages(m => [...m, { 
-        role: 'assistant', 
-        content: `Agent unavailable: ${err.message}. Connect Hermes first.`, 
-        timestamp: new Date() 
+      setMessages(m => [...m, {
+        role: 'assistant',
+        content: `Agent unavailable: ${err.message}. Connect Hermes first.`,
+        timestamp: new Date()
       }]);
     } finally {
       setLoading(false);

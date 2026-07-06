@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { LogOut, UtensilsCrossed, MapPin, Car, Bike, MessageSquare, Star, Receipt, ArrowLeft, ChevronRight, ClipboardList, Calendar, Clock, Users, StickyNote, CheckCircle2, Utensils, Palmtree, Truck, CreditCard, FileText, Loader2, ConciergeBell, AlertTriangle, Bell, Info, Phone, Mail, MapPinned, Moon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { setGuestSession } from '@/hooks/useGuestSession';
+import AgentChatPanel from '@/components/AgentChatPanel';
 
 const GUEST_PORTAL_KEY = 'guest_portal_session';
 
@@ -382,6 +383,8 @@ const GuestPortal = () => {
             <button onClick={logout} className="flex items-center justify-center gap-2 w-full font-body text-xs text-gold hover:text-foreground py-3">
               <LogOut className="w-3.5 h-3.5" /> Sign out
             </button>
+
+            <AgentChatPanel />
           </>
         )}
 
