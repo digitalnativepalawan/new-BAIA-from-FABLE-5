@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Send, X, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, X, Loader2, Settings } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -30,6 +30,7 @@ export default function AgentChatPanel() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isAdminPage = window.location.pathname.startsWith('/admin');
 
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();
@@ -93,6 +94,19 @@ export default function AgentChatPanel() {
 
   return (
     <>
+      {isAdminPage && (
+        <Button
+          onClick={() => { window.location.href = '/admin/bot-settings'; }}
+          variant="outline"
+          className="fixed bottom-6 right-24 z-50 h-14 rounded-full shadow-lg px-4 bg-card"
+          aria-label="Open local agent settings"
+          title="Local Agent Settings"
+        >
+          <Settings className="w-5 h-5 mr-2" />
+          Local Agent
+        </Button>
+      )}
+
       {!open && (
         <Button
           onClick={() => setOpen(true)}
