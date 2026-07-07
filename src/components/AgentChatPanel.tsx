@@ -12,6 +12,16 @@ interface Message {
 }
 
 const API_URL = import.meta.env.VITE_HERMES_URL || '/api/hermes';
+const SETTINGS_KEY = 'kapwa_bot_settings';
+const FAQ_KEY = 'kapwa_bot_faq_memory';
+
+function readLocalJson(key: string, fallback: unknown) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+  } catch {
+    return fallback;
+  }
+}
 
 export default function AgentChatPanel() {
   const [open, setOpen] = useState(false);
@@ -39,6 +49,16 @@ export default function AgentChatPanel() {
     setLoading(true);
 
     try {
+      const settings = readLocalJson(SETTINGS_KEY, {
+        enabled: true,
+        provider: 'ollama',
+        baseUrl: 'http://127.0.0.1:11434',
+        model: 'qwen2.5:3b',
+        temperature: 0.2,
+        maxTokens: 180,
+      });
+      const memory = readLocalJson(FAQ_KEY, []);
+
       const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: {
@@ -47,20 +67,23 @@ export default function AgentChatPanel() {
         body: JSON.stringify({
           message: userMessage,
           context: 'guest-concierge',
+          settings,
+          memory,
         }),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+
       setMessages(m => [...m, {
         role: 'assistant',
-        content: data.reply || 'No response from agent.',
+        content: data.reply || 'No response from the local agent.',
         timestamp: new Date()
       }]);
     } catch (err: any) {
       setMessages(m => [...m, {
         role: 'assistant',
-        content: `Agent unavailable: ${err.message}. Connect Hermes first.`,
+        content: `Local agent unavailable: ${err.message}. Make sure Ollama and the local backend are running.`,
         timestamp: new Date()
       }]);
     } finally {
@@ -70,7 +93,6 @@ export default function AgentChatPanel() {
 
   return (
     <>
-      {/* Floating toggle */}
       {!open && (
         <Button
           onClick={() => setOpen(true)}
@@ -81,7 +103,6 @@ export default function AgentChatPanel() {
         </Button>
       )}
 
-      {/* Chat dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md h-[600px] flex flex-col p-0 gap-0 bg-card border-border">
           <DialogHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between">
@@ -102,8 +123,8 @@ export default function AgentChatPanel() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground font-body text-sm gap-2">
                 <MessageSquare className="w-10 h-10 opacity-40" />
-                <p>Ask me anything about your resort operations.</p>
-                <p className="text-xs opacity-60">Try: "How many arrivals today?" or "Show kitchen orders"</p>
+                <p>Ask me anything about your stay.</p>
+                <p className="text-xs opacity-60">Common questions can be managed from Local Agent Settings.</p>
               </div>
             )}
 
