@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Save, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Save, Trash2, ArrowLeft, Download, Upload } from 'lucide-react';
 
 type FaqItem = {
   id: string;
@@ -52,8 +52,23 @@ function loadFaqs(): FaqItem[] {
   }
 }
 
+function normalizeFaq(item: any): FaqItem | null {
+  if (!item || typeof item.question !== 'string' || typeof item.answer !== 'string') return null;
+  const question = item.question.trim();
+  const answer = item.answer.trim();
+  if (!question || !answer) return null;
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : crypto.randomUUID(),
+    question,
+    keywords: typeof item.keywords === 'string' ? item.keywords.trim() : '',
+    answer,
+    active: item.active !== false,
+  };
+}
+
 export default function BotSettingsPage() {
   const navigate = useNavigate();
+  const importRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState<BotSettings>(loadSettings);
   const [faqs, setFaqs] = useState<FaqItem[]>(loadFaqs);
   const [form, setForm] = useState({ question: '', keywords: '', answer: '' });
@@ -75,7 +90,7 @@ export default function BotSettingsPage() {
       toast.error('Question and answer are required');
       return;
     }
-    const next = [
+    saveFaqs([
       ...faqs,
       {
         id: crypto.randomUUID(),
@@ -84,10 +99,46 @@ export default function BotSettingsPage() {
         answer: form.answer.trim(),
         active: true,
       },
-    ];
-    saveFaqs(next);
+    ]);
     setForm({ question: '', keywords: '', answer: '' });
     toast.success('Guest answer added');
+  };
+
+  const downloadAnswers = () => {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      answers: faqs,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kapwa-guest-answers-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast.success(`${faqs.length} answers downloaded`);
+  };
+
+  const importAnswers = async (file: File) => {
+    try {
+      const parsed = JSON.parse(await file.text());
+      const source = Array.isArray(parsed) ? parsed : parsed?.answers;
+      if (!Array.isArray(source)) throw new Error('The file does not contain an answers list.');
+      const imported = source.map(normalizeFaq).filter(Boolean) as FaqItem[];
+      if (imported.length === 0) throw new Error('No valid answers were found.');
+
+      const byQuestion = new Map<string, FaqItem>();
+      [...faqs, ...imported].forEach(item => byQuestion.set(item.question.toLowerCase(), item));
+      saveFaqs(Array.from(byQuestion.values()));
+      toast.success(`${imported.length} answers imported`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not import answers');
+    } finally {
+      if (importRef.current) importRef.current.value = '';
+    }
   };
 
   return (
@@ -139,9 +190,29 @@ export default function BotSettingsPage() {
         </section>
 
         <section className="border border-border rounded-lg p-4 space-y-4 bg-card">
-          <div>
-            <h2 className="font-display text-lg">Guest FAQ Memory</h2>
-            <p className="text-xs text-muted-foreground">{activeCount} active answers. Exact or keyword matches reply immediately without waiting for the model.</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <h2 className="font-display text-lg">Guest FAQ Memory</h2>
+              <p className="text-xs text-muted-foreground">{activeCount} active answers. Exact or keyword matches reply immediately without waiting for the model.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={downloadAnswers} disabled={faqs.length === 0}>
+                <Download className="w-4 h-4 mr-2" />Download Answers
+              </Button>
+              <Button variant="outline" onClick={() => importRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" />Import Answers
+              </Button>
+              <input
+                ref={importRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) importAnswers(file);
+                }}
+              />
+            </div>
           </div>
 
           <div className="space-y-2 border border-border rounded p-3">
