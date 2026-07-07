@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import OrderType from "./pages/OrderType";
 import MenuPage from "./pages/MenuPage";
 import AdminPage from "./pages/AdminPage";
+import BotSettingsPage from "./pages/BotSettingsPage";
 import EmployeePage from "./pages/EmployeePage";
 import EmployeePortal from "./pages/EmployeePortal";
 import KitchenPage from "./pages/KitchenPage";
@@ -55,6 +56,7 @@ const App = () => (
 
           {/* Admin Shell — control tower */}
           <Route path="/admin" element={<RequireAuth adminOnly><AdminPage /></RequireAuth>} />
+          <Route path="/admin/bot-settings" element={<RequireAuth adminOnly><BotSettingsPage /></RequireAuth>} />
 
           {/* Shared operational routes (still accessible directly) */}
           <Route path="/order-type" element={<RequireAuth requiredPermission="orders"><OrderType /></RequireAuth>} />
