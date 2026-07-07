@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -15,11 +16,58 @@ const API_URL = import.meta.env.VITE_HERMES_URL || '/api/hermes';
 const SETTINGS_KEY = 'kapwa_bot_settings';
 const FAQ_KEY = 'kapwa_bot_faq_memory';
 
+const defaultSettings = {
+  enabled: true,
+  provider: 'ollama',
+  baseUrl: 'http://127.0.0.1:11434',
+  model: 'qwen2.5:3b',
+  temperature: 0.2,
+  maxTokens: 180,
+};
+
 function readLocalJson(key: string, fallback: unknown) {
   try {
     return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
   } catch {
     return fallback;
+  }
+}
+
+async function loadSharedBotData() {
+  const fallbackSettings = readLocalJson(SETTINGS_KEY, defaultSettings);
+  const fallbackMemory = readLocalJson(FAQ_KEY, []);
+
+  try {
+    const [settingsResult, memoryResult] = await Promise.all([
+      (supabase.from('settings') as any)
+        .select('bot_enabled, bot_provider, bot_base_url, bot_model, bot_temperature, bot_max_tokens')
+        .limit(1)
+        .maybeSingle(),
+      (supabase.from('guest_faq_memory') as any)
+        .select('id, question, keywords, answer, active, sort_order')
+        .eq('active', true)
+        .order('sort_order'),
+    ]);
+
+    if (settingsResult.error) throw settingsResult.error;
+    if (memoryResult.error) throw memoryResult.error;
+
+    const row = settingsResult.data;
+    const settings = row ? {
+      enabled: row.bot_enabled !== false,
+      provider: row.bot_provider || 'ollama',
+      baseUrl: row.bot_base_url || defaultSettings.baseUrl,
+      model: row.bot_model || defaultSettings.model,
+      temperature: Number(row.bot_temperature ?? defaultSettings.temperature),
+      maxTokens: Number(row.bot_max_tokens ?? defaultSettings.maxTokens),
+    } : fallbackSettings;
+    const memory = Array.isArray(memoryResult.data) ? memoryResult.data : fallbackMemory;
+
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    localStorage.setItem(FAQ_KEY, JSON.stringify(memory));
+    return { settings, memory };
+  } catch {
+    return { settings: fallbackSettings, memory: fallbackMemory };
   }
 }
 
@@ -50,21 +98,10 @@ export default function AgentChatPanel() {
     setLoading(true);
 
     try {
-      const settings = readLocalJson(SETTINGS_KEY, {
-        enabled: true,
-        provider: 'ollama',
-        baseUrl: 'http://127.0.0.1:11434',
-        model: 'qwen2.5:3b',
-        temperature: 0.2,
-        maxTokens: 180,
-      });
-      const memory = readLocalJson(FAQ_KEY, []);
-
+      const { settings, memory } = await loadSharedBotData();
       const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
           context: 'guest-concierge',
@@ -79,13 +116,13 @@ export default function AgentChatPanel() {
       setMessages(m => [...m, {
         role: 'assistant',
         content: data.reply || 'No response from the local agent.',
-        timestamp: new Date()
+        timestamp: new Date(),
       }]);
     } catch (err: any) {
       setMessages(m => [...m, {
         role: 'assistant',
         content: `Local agent unavailable: ${err.message}. Make sure Ollama and the local backend are running.`,
-        timestamp: new Date()
+        timestamp: new Date(),
       }]);
     } finally {
       setLoading(false);
@@ -179,9 +216,9 @@ export default function AgentChatPanel() {
               className="font-body bg-secondary border-border text-foreground"
               disabled={loading}
             />
-            <Button 
-              onClick={sendMessage} 
-              disabled={loading || !input.trim()} 
+            <Button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
               className="px-3"
               aria-label="Send message"
             >
